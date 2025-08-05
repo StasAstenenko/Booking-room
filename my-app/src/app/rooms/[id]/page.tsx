@@ -112,6 +112,22 @@ const RoomDetailsPage = () => {
     return router.push('/dashboard');
   };
 
+  const handleJoinRoom = async () => {
+    const user = auth.currentUser;
+    if (!user?.email) return;
+
+    const docRef = doc(db, 'rooms', id as string);
+
+    try {
+      await updateDoc(docRef, {
+        [`roles.${user.email}`]: 'user',
+      });
+      await fetchRoom();
+    } catch (err) {
+      console.error('Не вдалося приєднатися:', err);
+    }
+  };
+
   if (!room) return <p>Завантаження...</p>;
 
   return (
@@ -124,6 +140,15 @@ const RoomDetailsPage = () => {
       </button>
       <h1 className='text-2xl font-bold mb-4'>{room.name}</h1>
       <p className='mb-2'>{room.description}</p>
+
+      {!userRole && (
+        <button
+          className='mt-6 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700'
+          onClick={handleJoinRoom}
+        >
+          Приєднатися до кімнати
+        </button>
+      )}
 
       {userRole === 'admin' && (
         <>
@@ -171,7 +196,7 @@ const RoomDetailsPage = () => {
           {room.roles ? (
             Object.entries(room.roles).map(([email, role]) => (
               <li key={email} className='text-sm'>
-                {email} — <strong>{role}</strong>
+                {email} — <strong>{role.com}</strong>
               </li>
             ))
           ) : (
