@@ -12,8 +12,8 @@ import {
   getDocs,
   query,
   where,
-  setDoc,
 } from 'firebase/firestore';
+import { fixAllRoomRoles } from '@/firebase/fixRole';
 
 interface Room {
   id: string;
@@ -128,6 +128,10 @@ const RoomDetailsPage = () => {
     }
   };
 
+  useEffect(() => {
+    fixAllRoomRoles();
+  }, []);
+
   if (!room) return <p>Завантаження...</p>;
 
   return (
@@ -196,7 +200,10 @@ const RoomDetailsPage = () => {
           {room.roles ? (
             Object.entries(room.roles).map(([email, role]) => (
               <li key={email} className='text-sm'>
-                {email} — <strong>{role.com}</strong>
+                {email} —{' '}
+                <strong>
+                  {typeof role === 'string' ? role : JSON.stringify(role)}
+                </strong>
               </li>
             ))
           ) : (
